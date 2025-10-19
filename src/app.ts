@@ -1,0 +1,147 @@
+import 'module-alias/register';
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import { connectDatabase } from '@/config/database.config';
+import { config } from '@/config/env.config';
+import { logger } from '@/utils/logger';
+import { errorHandler, notFoundHandler } from '@/middleware/errorHandler';
+import { HTTP_STATUS } from '@/config/constants';
+
+// Import routes
+import authRoutes from '@/routes/auth.routes';
+import chatRoutes from '@/routes/chat.routes';
+
+const app = express();
+
+// Trust proxy for accurate IP addresses in production
+app.set('trust proxy', 1);
+
+// Security middleware
+app.use(
+  helmet({
+    crossOriginEmbedderPolicy: false, // Disable for development
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
+    },
+  })
+);
+
+// CORS configuration
+app.use(
+  cors({
+    origin: config.cors.origin.split(',').map((origin: string) => origin.trim()),
+    credentials: true,
+    optionsSuccessStatus: 200, // Some legacy browsers choke on 204
+  })
+);
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: config.rateLimit.windowMs,
+  max: config.rateLimit.maxRequests,
+  message: {
+    success: false,
+    message: 'Too many requests, please try again later.',
+    error: {
+      code: 'RATE_LIMIT_EXCEEDED',
+    },
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+app.use(limiter);
+
+// Body parsing middleware
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Health check endpoint
+app.get('/health', (_req, res) => {
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    message: 'Server is healthy',
+    data: {
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: config.env,
+    },
+  });
+});
+
+// API routes
+app.use('/api/v1', (req, _res, next) => {
+  logger.info(`${req.method} ${req.originalUrl}`, {
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
+  });
+  next();
+});
+
+// Route handlers
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/chat', chatRoutes);
+
+// 404 handler for undefined routes
+app.use(notFoundHandler);
+
+// Global error handler
+app.use(errorHandler);
+
+// Start server function
+const startServer = async (): Promise<void> => {
+  try {
+    await connectDatabase();
+
+    const http = await import('http');
+    const { initSocket } = await import('@/services/socket.service');
+    const server = http.createServer(app);
+    initSocket(server);
+
+    server.listen(config.port, () => {
+      logger.info(`Server running on port ${config.port} in ${config.env} mode`);
+
+      if (config.env === 'development') {
+        logger.info('📚 API Documentation: http://localhost:' + config.port + '/health');
+        logger.info('🔍 Health Check: http://localhost:' + config.port + '/health');
+      }
+    });
+
+    // Graceful shutdown
+    const gracefulShutdown = (signal: string): void => {
+      logger.info(`Received ${signal}, shutting down gracefully`);
+
+      server.close(() => {
+        logger.info('Server closed');
+        process.exit(0);
+      });
+
+      // Force close after 30 seconds
+      setTimeout(() => {
+        logger.error('Could not close connections in time, forcefully shutting down');
+        process.exit(1);
+      }, 30000);
+    };
+
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+// Start the server if this file is run directly
+if (require.main === module) {
+  startServer();
+}
+
+export default app;
+export { startServer };
