@@ -4,7 +4,12 @@ import { logger, logError } from '@/utils/logger';
 import { HTTP_STATUS } from '@/config/constants';
 import { config } from '@/config/env.config';
 
-export const errorHandler = (error: Error, req: Request, res: Response): void => {
+export const errorHandler = (
+  error: Error,
+  req: Request,
+  res: Response,
+  _next: NextFunction
+): void => {
   let statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR;
   let message = 'Internal server error';
   let code = 'INTERNAL_SERVER_ERROR';

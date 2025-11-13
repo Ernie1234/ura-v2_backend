@@ -5,21 +5,26 @@ import {
   register,
   login,
   refresh,
-  verifyEmail,
-  enable2FA,
-  disable2FA,
   logout,
-} from '@/controllers/auth.controller';
-import { requireAuth } from '@/middleware/auth';
+  verifyEmail,
+  googleAuth,
+  googleCallback,
+} from '@/controllers/passport-auth.controller';
+import { requireAuth } from '@/middleware/passport-auth';
 
 const router = Router();
 
+// Local authentication
 router.post('/register', validateRequest(registerSchema), register);
-router.get('/verify-email', verifyEmail);
 router.post('/login', validateRequest(loginSchema), login);
 router.post('/logout', requireAuth, logout);
 router.post('/refresh', validateRequest(refreshTokenSchema), refresh);
-router.post('/2fa/enable', requireAuth, enable2FA);
-router.post('/2fa/disable', requireAuth, disable2FA);
+router.get('/verify-email', verifyEmail);
+
+// Google OAuth
+router.get('/google', googleAuth);
+router.get('/google/callback', googleCallback);
+
+// TODO: Add Apple, Facebook, etc.
 
 export default router;

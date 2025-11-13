@@ -37,6 +37,7 @@
       "@/services/*": ["src/services/*"],
       "@/types/*": ["src/types/*"],
       "@/utils/*": ["src/utils/*"],
+      "@/constants/*": ["src/constants/*"],
       "@/validators/*": ["src/validators/*"]
     },
      "types": ["jest"]

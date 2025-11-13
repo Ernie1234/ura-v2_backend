@@ -18,6 +18,8 @@ const envSchema = Joi.object({
   // OAuth - Google
   GOOGLE_CLIENT_ID: Joi.string().required(),
   GOOGLE_CLIENT_SECRET: Joi.string().required(),
+  GOOGLE_CALLBACK_URL: Joi.string().uri().default('http://localhost:8000/api/auth/google/callback'),
+  FRONTEND_URL: Joi.string().uri().default('http://localhost:5173'),
 
   // OAuth - Apple
   APPLE_CLIENT_ID: Joi.string().required(),
@@ -32,20 +34,26 @@ const envSchema = Joi.object({
   AWS_S3_BUCKET_NAME: Joi.string().required(),
 
   // App
-  APP_URL: Joi.string().uri().default('http://localhost:5000'),
+  APP_URL: Joi.string().uri().default('http://localhost:8000'),
 
-  // Email (Required for email verification)
-  SMTP_HOST: Joi.string().required(),
-  SMTP_PORT: Joi.number().port().default(587),
-  SMTP_USER: Joi.string().required(),
+  // Email (Mailtrap for development/testing)
+  MAILTRAP_TOKEN: Joi.string().optional(),
+  MAILTRAP_TEMPLATE_UUID: Joi.string().optional(),
+
+  // SMTP Email Configuration
+  SMTP_HOST: Joi.string().default('smtp.gmail.com'),
+  SMTP_PORT: Joi.number().default(587),
+  SMTP_USER: Joi.string().email().required(),
   SMTP_PASS: Joi.string().required(),
+  SMTP_FROM_EMAIL: Joi.string().email().required(),
+  SMTP_FROM_NAME: Joi.string().default('Ura'),
 
   // Rate Limiting
   RATE_LIMIT_WINDOW_MS: Joi.number().positive().default(900000), // 15 minutes
   RATE_LIMIT_MAX_REQUESTS: Joi.number().positive().default(100),
 
   // CORS
-  CORS_ORIGIN: Joi.string().default('http://localhost:3000'),
+  CORS_ORIGIN: Joi.string().default('http://localhost:5173'),
 
   // File Upload
   MAX_FILE_SIZE: Joi.number().positive().default(5242880), // 5MB
@@ -78,6 +86,7 @@ export const config = {
     google: {
       clientId: envVars.GOOGLE_CLIENT_ID,
       clientSecret: envVars.GOOGLE_CLIENT_SECRET,
+      callbackUrl: envVars.GOOGLE_CALLBACK_URL,
     },
     apple: {
       clientId: envVars.APPLE_CLIENT_ID,
@@ -85,6 +94,10 @@ export const config = {
       keyId: envVars.APPLE_KEY_ID,
       privateKey: envVars.APPLE_PRIVATE_KEY,
     },
+  },
+
+  frontend: {
+    url: envVars.FRONTEND_URL,
   },
 
   aws: {
@@ -99,10 +112,19 @@ export const config = {
   },
 
   email: {
-    host: envVars.SMTP_HOST,
-    port: envVars.SMTP_PORT,
-    user: envVars.SMTP_USER,
-    pass: envVars.SMTP_PASS,
+    token: envVars.MAILTRAP_TOKEN,
+    uuid: envVars.MAILTRAP_TEMPLATE_UUID,
+    smtp: {
+      host: envVars.SMTP_HOST,
+      port: envVars.SMTP_PORT,
+      user: envVars.SMTP_USER,
+      pass: envVars.SMTP_PASS,
+      from: {
+        email: envVars.SMTP_FROM_EMAIL,
+        name: envVars.SMTP_FROM_NAME,
+      },
+      env: envVars.NODE_ENV,
+    },
   },
 
   rateLimit: {

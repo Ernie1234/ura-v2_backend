@@ -48,7 +48,6 @@ export const registerSchema = {
     password: passwordSchema,
     firstName: nameSchema.label('First name'),
     lastName: nameSchema.label('Last name'),
-    username: usernameSchema,
   }),
 };
 

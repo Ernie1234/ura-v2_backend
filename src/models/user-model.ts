@@ -1,3 +1,4 @@
+import { getRandomCoverImage } from '@/utils/fnLib';
 import { Schema, model, Document, Types } from 'mongoose';
 
 // Interface for TypeScript
@@ -9,6 +10,8 @@ export interface IUser extends Document {
   googleId?: string;
   appleId?: string;
   profilePicture?: string;
+  coverImage?: string;
+  businessName?: string; // Optional business display name
   emailVerified?: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
@@ -22,7 +25,9 @@ export interface IUser extends Document {
   followingUsers: Types.ObjectId[];
   followingBusinesses: Types.ObjectId[];
   followers: Types.ObjectId[];
-  businesses: Types.ObjectId[]; // Businesses this user owns/manages
+  businesses: Types.ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const userSchema = new Schema<IUser>(
@@ -34,6 +39,11 @@ const userSchema = new Schema<IUser>(
     googleId: { type: String, sparse: true, unique: true },
     appleId: { type: String, sparse: true, unique: true },
     profilePicture: { type: String },
+    coverImage: {
+      type: String,
+      default: getRandomCoverImage,
+    },
+    businessName: { type: String, trim: true },
     emailVerified: { type: Boolean, default: false },
     emailVerificationToken: { type: String, index: true, select: false },
     emailVerificationExpires: { type: Date, select: false },
@@ -51,8 +61,5 @@ const userSchema = new Schema<IUser>(
   },
   { timestamps: true }
 ); // Automatically adds createdAt and updatedAt
-
-userSchema.index({ email: 1 }, { unique: true });
-userSchema.index({ emailVerificationToken: 1 }, { sparse: true });
 
 export const User = model<IUser>('User', userSchema);

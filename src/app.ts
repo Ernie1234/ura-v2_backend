@@ -3,15 +3,14 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import passport from './config/passport.config'; // Initialize Passport strategies
 import { connectDatabase } from '@/config/database.config';
 import { config } from '@/config/env.config';
 import { logger } from '@/utils/logger';
 import { errorHandler, notFoundHandler } from '@/middleware/errorHandler';
 import { HTTP_STATUS } from '@/config/constants';
-
 // Import routes
-import authRoutes from '@/routes/auth.routes';
-import chatRoutes from '@/routes/chat.routes';
+import routes from './routes';
 
 const app = express();
 
@@ -63,6 +62,9 @@ app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Initialize Passport
+app.use(passport.initialize());
+
 // Health check endpoint
 app.get('/health', (_req, res) => {
   res.status(HTTP_STATUS.OK).json({
@@ -86,8 +88,7 @@ app.use('/api/v1', (req, _res, next) => {
 });
 
 // Route handlers
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/chat', chatRoutes);
+app.use('/api/v1', routes);
 
 // 404 handler for undefined routes
 app.use(notFoundHandler);
