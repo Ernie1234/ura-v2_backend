@@ -4,7 +4,6 @@ import crypto from 'crypto';
 import speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 import { User } from '@/models/user-model';
-import { HTTP_STATUS } from '@/config/constants';
 import { AuthenticationError, ValidationError } from '@/utils/errors';
 import {
   generateAccessToken,
@@ -14,6 +13,7 @@ import {
 } from '@/services/token.service';
 import { sendVerificationEmail } from '@/services/email.service';
 import { asyncHandler } from '@/middleware/errorHandler';
+import { HTTP_STATUS } from '@/constants';
 
 export const register = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { firstName, lastName, email, password } = req.body;

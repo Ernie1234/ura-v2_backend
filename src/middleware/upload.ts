@@ -1,9 +1,9 @@
 import multer from 'multer';
 import path from 'path';
-import { Request } from 'express';
+import { Request, RequestHandler } from 'express'; // RequestHandler is correctly imported here
 import { config } from '@/config/env.config';
 import { FileUploadError } from '@/utils/errors';
-import { UPLOAD_DESTINATIONS } from '@/config/constants';
+import { UPLOAD_DESTINATIONS } from '@/constants';
 
 // File type validation
 const fileFilter = (
@@ -62,10 +62,7 @@ export const uploadLocal = createUploadMiddleware(localStorage);
 export const uploadMemory = createUploadMiddleware(memoryStorage);
 
 // Specific upload configurations
-export const uploadSingle = (
-  fieldName: string,
-  useMemory: boolean = false
-): multer.RequestHandler => {
+export const uploadSingle = (fieldName: string, useMemory: boolean = false): RequestHandler => {
   const upload = useMemory ? uploadMemory : uploadLocal;
   return upload.single(fieldName);
 };
@@ -74,7 +71,7 @@ export const uploadMultiple = (
   fieldName: string,
   maxCount: number = 5,
   useMemory: boolean = false
-): multer.RequestHandler => {
+): RequestHandler => {
   const upload = useMemory ? uploadMemory : uploadLocal;
   return upload.array(fieldName, maxCount);
 };
@@ -82,7 +79,7 @@ export const uploadMultiple = (
 export const uploadFields = (
   fields: Array<{ name: string; maxCount?: number }>,
   useMemory: boolean = false
-): multer.RequestHandler => {
+): RequestHandler => {
   const upload = useMemory ? uploadMemory : uploadLocal;
   return upload.fields(fields);
 };

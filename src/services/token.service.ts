@@ -15,7 +15,11 @@ export const generateRefreshToken = (payload: object): string => {
 };
 
 export const verifyToken = (token: string, refresh = false): Record<string, unknown> => {
-  return jwt.verify(token, refresh ? config.jwt.refreshSecret : config.jwt.secret);
+  const decoded = jwt.verify(token, refresh ? config.jwt.refreshSecret : config.jwt.secret);
+  if (typeof decoded === 'string') {
+    throw new Error('Invalid token format: Expected object payload.');
+  }
+  return decoded as Record<string, unknown>;
 };
 
 export const generateEmailToken = (): { token: string; hash: string; expires: Date } => {

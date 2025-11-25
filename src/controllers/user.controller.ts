@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { User } from '@/models/user-model';
-import { HTTP_STATUS } from '@/config/constants';
+
 import { AuthenticationError } from '@/utils/errors';
 import { asyncHandler } from '@/middleware/errorHandler';
+import { HTTP_STATUS } from '@/constants';
 
 export const getCurrentUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const userId = (req as any).user?.id || (req as any).user?.userId || (req as any).user?._id;

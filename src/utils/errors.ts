@@ -1,5 +1,4 @@
-import { HTTP_STATUS } from '@/config/constants';
-
+import { HTTP_STATUS } from '@/constants';
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly code: string;

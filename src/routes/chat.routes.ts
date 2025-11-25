@@ -9,7 +9,7 @@ const router = Router();
 router.post('/conversations', requireAuth, async (req, res, next) => {
   try {
     const { businessId } = req.body;
-    const userId = (req as { user: { id: string } }).user.id;
+    const userId = (req as unknown as { user: { id: string } }).user.id;
     const convo = await Conversation.findOneAndUpdate(
       { 'participants.user': userId, 'participants.business': businessId },
       { $setOnInsert: { participants: { user: userId, business: businessId } } },

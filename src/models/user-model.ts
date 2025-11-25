@@ -5,6 +5,7 @@ import { Schema, model, Document, Types } from 'mongoose';
 export interface IUser extends Document {
   firstName: string;
   lastName: string;
+  username: string;
   email: string;
   password?: string; // Optional for OAuth users
   googleId?: string;
@@ -34,6 +35,7 @@ const userSchema = new Schema<IUser>(
   {
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
+    username: { type: String, required: true, unique: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, select: false }, // 'select: false' hides it from default queries
     googleId: { type: String, sparse: true, unique: true },
@@ -61,5 +63,16 @@ const userSchema = new Schema<IUser>(
   },
   { timestamps: true }
 ); // Automatically adds createdAt and updatedAt
+
+userSchema.virtual('fullName').get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
+
+userSchema.pre<IUser>('save', function (next) {
+  if (!this.username && this.firstName && this.lastName) {
+    this.username = `_@${this.firstName.toLowerCase()}${this.lastName.toLowerCase()}`;
+  }
+  next();
+});
 
 export const User = model<IUser>('User', userSchema);

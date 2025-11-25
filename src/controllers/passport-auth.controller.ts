@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import passport from 'passport';
 import bcrypt from 'bcryptjs';
 import { User } from '@/models/user-model';
-import { HTTP_STATUS } from '@/config/constants';
 import { AuthenticationError, ValidationError } from '@/utils/errors';
 import {
   generateAccessToken,
@@ -14,6 +13,7 @@ import { sendVerificationEmail } from '@/services/email.service';
 import { asyncHandler } from '@/middleware/errorHandler';
 import { blacklistToken } from '@/services/token-blacklist.service';
 import { config } from '@/config/env.config';
+import { HTTP_STATUS } from '@/constants';
 
 /**
  * Register new user (Local)

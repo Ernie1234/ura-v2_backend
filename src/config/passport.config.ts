@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import { Strategy as JWTStrategy, ExtractJwt } from 'passport-jwt';
@@ -92,7 +93,7 @@ passport.use(
       clientSecret: config.oauth?.google?.clientSecret || '',
       callbackURL: config.oauth?.google?.callbackUrl || '/api/auth/google/callback',
     },
-    async (accessToken, refreshToken, profile, done) => {
+    async (_accessToken, _refreshToken, profile, done) => {
       try {
         // Check if user exists with this Google ID
         let user = await User.findOne({ googleId: profile.id });

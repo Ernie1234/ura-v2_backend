@@ -1,4 +1,5 @@
 import { TokenBlacklist } from '@/models/token-blacklist-model';
+import { logger } from '@/utils';
 
 /**
  * Add a token to the blacklist
@@ -29,11 +30,11 @@ export const isTokenBlacklisted = async (token: string): Promise<boolean> => {
  * Blacklist all tokens for a user (useful for account deletion or security breach)
  */
 export const blacklistAllUserTokens = async (userId: string): Promise<void> => {
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+  // const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
 
   // This is a placeholder - in production you'd need to track active tokens
   // For now, we'll just invalidate future tokens by updating user record
-  console.log(`Blacklisting all tokens for user: ${userId}`);
+  logger.info(`Blacklisting all tokens for user: ${userId}`);
 };
 
 /**

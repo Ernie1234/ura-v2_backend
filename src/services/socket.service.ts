@@ -13,7 +13,7 @@ export const initSocket = (server: http.Server): Server => {
       const token = socket.handshake.auth?.token || socket.handshake.query?.token;
       if (!token) return next(new Error('Unauthorized'));
       const decoded = verifyToken(String(token)) as { userId: string };
-      (socket as { userId: string }).userId = decoded.userId;
+      (socket as unknown as { userId: string }).userId = decoded.userId;
       next();
     } catch {
       next(new Error('Unauthorized'));
@@ -21,7 +21,7 @@ export const initSocket = (server: http.Server): Server => {
   });
 
   io.on('connection', socket => {
-    const userId = (socket as { userId: string }).userId;
+    const userId = (socket as unknown as { userId: string }).userId;
     socket.join(userId);
 
     socket.on('chat:join', (conversationId: string) => {

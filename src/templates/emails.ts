@@ -10,11 +10,6 @@ import {
 
 const baseUrl = config.app.url;
 
-// Define recipient type
-interface Recipient {
-  email: string;
-}
-
 export const sendVerificationEmail = async (
   email: string,
   verificationToken: string

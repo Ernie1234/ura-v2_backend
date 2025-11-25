@@ -8,9 +8,10 @@ import { connectDatabase } from '@/config/database.config';
 import { config } from '@/config/env.config';
 import { logger } from '@/utils/logger';
 import { errorHandler, notFoundHandler } from '@/middleware/errorHandler';
-import { HTTP_STATUS } from '@/config/constants';
+
 // Import routes
 import routes from './routes';
+import { HTTP_STATUS } from './constants';
 
 const app = express();
 
